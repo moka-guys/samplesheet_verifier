@@ -4,7 +4,8 @@
 
 # Get path from command line
 
-directory_to_watch="/home/graeme/Desktop/Test_name_checker/"
+# "/home/graeme/Desktop/Test_name_checker/"
+directory_to_watch=$1
 
 ############### Functions ###############
 
@@ -12,8 +13,8 @@ directory_to_watch="/home/graeme/Desktop/Test_name_checker/"
 function raise_warning {
 
 # Usage: raise_warning ${warning_message}
-
 warning_message=${1}
+
 # Print warning to command line (Useful for testing)
 echo "$warning_message"
 # Raise a local warning notification for the user on the workstation
@@ -39,7 +40,7 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
             ${array[4]} =~ "SampleSheet.csv" && \
             ${#array[@]} == 5 ]]; # Does the file match expected pattern
         then
-            echo "$file ${#array[@]} matches pattern"
+            echo "$file matches pattern"
         else
             raise_warning "Sample sheet has been saved to workstation with the file name $file, which does not match the expected naming convention"
         fi
@@ -59,6 +60,12 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
 
         ## Check the data is well formatted
         # Check for trailing and leading spaces within fields
+
+        # Check that sample names are formatted correctly
+
+        # Check that indexes have been supplied correctly
+
+
         # sed 's/[ \t]*$//gp' 200515_NB551068_0327_AH5W7YBGXF_SampleSheet.csv
         # sed 's/[ \t]*$//gp' "$file"
         # sed 's/[ \t]*$//gp' "$file" | diff file.conf -
