@@ -6,7 +6,24 @@
 
 directory_to_watch="/home/graeme/Desktop/Test_name_checker/"
 
-# 
+############### Functions ###############
+
+# Send warning messages
+function raise_warning {
+
+# Usage: raise_warning ${warning_message}
+
+warning_message=${1}
+# Print warning to command line (Useful for testing)
+echo "$warning_message"
+# Raise a local warning notification for the user on the workstation
+notify-send -u critical "$warning_message"
+# Trigger a remote alert in Slack & save warning to local log
+# logger -s "$warning_message"
+}
+
+############### Run Program ###############
+
 
 inotifywait -m $directory_to_watch -e create -e moved_to |
     while read -r file; do
@@ -24,13 +41,7 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
         then
             echo "$file ${#array[@]} matches pattern"
         else
-        	# If file name does not match expected naming pattern:
-        	# Send notification to commandline (useful for testing)
-        	echo "$file does not match expected pattern"
-        	# Send notification to user - "-u critical" flag means the notification need to be dismissed by the user
-        	notify-send -u critical "$file does not match expected pattern"
-        	# Trigger an alert in Slack
-        	logger -s "Sample sheet has been saved to workstation with the file name $file, which does not match the expected naming convention"
+            raise_warning "Sample sheet has been saved to workstation with the file name $file, which does not match the expected naming convention"
         fi
 
         ## Check that the contents of the SampleSheet pass some minimum criteria
@@ -40,7 +51,7 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
         lines_detected_in_file=$(wc -l "$file")
         if [[ ! $lines_detected_in_file > $lines_expected_in_file ]];
         then
-        	echo "$file contains only $lines_detected_in_file lines, but expected at least $lines_expected_in_file for valid file"
+        	raise_warning "$file contains only $lines_detected_in_file lines, but expected at least $lines_expected_in_file for valid file"
         fi
 
         # Check the header headings are correct
@@ -48,8 +59,8 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
 
         ## Check the data is well formatted
         # Check for trailing and leading spaces within fields
-        sed 's/[ \t]*$//gp' 200515_NB551068_0327_AH5W7YBGXF_SampleSheet.csv
-        sed 's/[ \t]*$//gp' $file
-        sed 's/[ \t]*$//gp' $file | diff file.conf -
+        # sed 's/[ \t]*$//gp' 200515_NB551068_0327_AH5W7YBGXF_SampleSheet.csv
+        # sed 's/[ \t]*$//gp' "$file"
+        # sed 's/[ \t]*$//gp' "$file" | diff file.conf -
         # sed 's/domain1.com/domain2.com/gp' $file | diff file.conf -
     done
