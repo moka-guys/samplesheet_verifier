@@ -8,6 +8,7 @@
 
 # "/home/graeme/Desktop/Test_name_checker/"
 directory_to_watch=$1
+warning_message_array=() # Initiate empty array
 
 ############### Functions ###############
 
@@ -23,6 +24,13 @@ echo "$warning_message"
 notify-send -u critical "$warning_message"
 # Trigger a remote alert in Slack & save warning to local log
 # logger -s "$warning_message"
+}
+
+# Send warning messages
+function set_warning_message {
+
+# Usage: raise_warning ${warning_message}
+warning_message_array=${1}
 }
 
 ############### Run Program ###############
@@ -59,7 +67,7 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
 
         # Check the header headings are correct
         # Extract first column to array
-        first_col_array=($(cut -d ',' -f1 "$file" | head -n 19))
+        mapfile -t first_col_array < <(cut -d ',' -f1 "$file" | head -n 19)
         # Check headings are correct:
         if [[ ${first_col_array[0]} == "[Header]" && \
         ${first_col_array[1]} == "IEMFileVersion" && \
@@ -84,13 +92,14 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
         # Check read lengths have been entered correctly (length 300-999):
         if [[ ${first_col_array[12]} =~ [0-9]{3}] || ${first_col_array[13]} =~ [0-9]{3}] ]];
         then
-            echo "Read lengths are within plausible value"
+            echo "Read lengths are within plausible values"
         else
-            raise_warning "$file has incorrect heading titles in header"
+            raise_warning "$file has no or incorrect read lengths recorded"
         fi
 
         # Check that the row headings are correct:
-        if [[ cat $file | head -n 19 | tail -n 1 == "Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Description" ]];
+        row_names=$("$file" | head -n 19 | tail -n 1)
+        if [[ $row_names == "Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Description" ]];
         then
             echo "Spreadsheet row names are correct"
         else
@@ -98,11 +107,7 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
         fi
         # Check that sample names are formatted correctly
 
-        # Check that indexes have been supplied correctly
 
+        # Check that indexes have been input correctly
 
-        # sed 's/[ \t]*$//gp' 200515_NB551068_0327_AH5W7YBGXF_SampleSheet.csv
-        # sed 's/[ \t]*$//gp' "$file"
-        # sed 's/[ \t]*$//gp' "$file" | diff file.conf -
-        # sed 's/domain1.com/domain2.com/gp' $file | diff file.conf -
     done
