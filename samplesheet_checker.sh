@@ -60,66 +60,65 @@ inotifywait -m "$directory_to_watch" -e create -e moved_to |
         ## Check that the contents of the SampleSheet pass some minimum criteria
 
         # Check that the file is not empty:
-        if [[ -s $absolute_file_path ]];
+        if [[ ! -s $absolute_file_path ]];
         then
             raise_warning "$file_name, is an empty file";
         else
             echo "$file_name contains data";
             # Run further checks on the formatting of the data
+            # Check that the SampleSheet has data in it
+            lines_expected_in_file=20 # Header takes up 19 lines
+            lines_detected_in_file=$(wc -l "$absolute_file_path")
+            if [[ ! $lines_detected_in_file > $lines_expected_in_file ]];
+            then
+                raise_warning "$file_name contains only $lines_detected_in_file lines, but expected at least $lines_expected_in_file for valid file"
+
+                # Check the header headings are correct
+                # Extract first column to array
+
+                mapfile -t first_col_array < <(cut -d ',' -f1 "$absolute_file_path" | head -n 19)
+                # Check headings are correct:
+                if [[ ${first_col_array[0]} == "[Header]" && \
+                ${first_col_array[1]} == "IEMFileVersion" && \
+                ${first_col_array[2]} == "Investigator Name" && \
+                ${first_col_array[3]} == "Experiment Name" && \
+                ${first_col_array[4]} == "Date" && \
+                ${first_col_array[5]} == "Workflow" && \
+                ${first_col_array[6]} == "Application" && \
+                ${first_col_array[7]} == "Assay" && \
+                ${first_col_array[8]} == "Description" && \
+                ${first_col_array[9]} == "Chemistry" && \
+                ${first_col_array[11]} == "[Reads]" && \
+                ${first_col_array[15]} == "[Settings]" && \
+                ${first_col_array[17]} == "[Data]" && \
+                ${first_col_array[18]} == "Sample_ID" ]];
+                then
+                    echo "Row names in headers for $file are correct"
+                else
+                    raise_warning "$file has incorrect heading titles in header"
+                fi
+
+                # Check read lengths have been entered correctly (length 100-999):
+                if [[ ${first_col_array[12]} =~ [0-9]{3}] || ${first_col_array[13]} =~ [0-9]{3}] ]];
+                then
+                    echo "Read lengths are within expected values"
+                else
+                    raise_warning "$file has no, or incorrect, read lengths recorded"
+                fi
+
+                # Check that the row headings are correct:
+                row_names=$("$absolute_file_path" head -n 19 | tail -n 1)
+                echo row_names
+                if [[ $row_names == "Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Description" ]];
+                then
+                    echo "Spreadsheet row names are correct"
+                else
+                    raise_warning "$file has incorrect row names"
+                fi
+                # Check that sample names are formatted correctly
+
+
+                # Check that indexes have been input correctly
+            fi
         fi
-
-        # Check that the SampleSheet has data in it
-        lines_expected_in_file=20 # Header takes up 19 lines
-        lines_detected_in_file=$(wc -l "$absolute_file_path")
-        if [[ ! $lines_detected_in_file > $lines_expected_in_file ]];
-        then
-        	raise_warning "$file_name contains only $lines_detected_in_file lines, but expected at least $lines_expected_in_file for valid file"
-        fi
-
-        # Check the header headings are correct
-        # Extract first column to array
-        mapfile -t first_col_array < <(cut -d ',' -f1 "$absolute_file_path" | head -n 19)
-        # Check headings are correct:
-        if [[ ${first_col_array[0]} == "[Header]" && \
-        ${first_col_array[1]} == "IEMFileVersion" && \
-        ${first_col_array[2]} == "Investigator Name" && \
-        ${first_col_array[3]} == "Experiment Name" && \
-        ${first_col_array[4]} == "Date" && \
-        ${first_col_array[5]} == "Workflow" && \
-        ${first_col_array[6]} == "Application" && \
-        ${first_col_array[7]} == "Assay" && \
-        ${first_col_array[8]} == "Description" && \
-        ${first_col_array[9]} == "Chemistry" && \
-        ${first_col_array[11]} == "[Reads]" && \
-        ${first_col_array[15]} == "[Settings]" && \
-        ${first_col_array[17]} == "[Data]" && \
-        ${first_col_array[18]} == "Sample_ID" ]];
-        then
-            echo "Row names in headers for $file are correct"
-        else
-            raise_warning "$file has incorrect heading titles in header"
-        fi
-
-        # Check read lengths have been entered correctly (length 300-999):
-        if [[ ${first_col_array[12]} =~ [0-9]{3}] || ${first_col_array[13]} =~ [0-9]{3}] ]];
-        then
-            echo "Read lengths are within plausible values"
-        else
-            raise_warning "$file has no or incorrect read lengths recorded"
-        fi
-
-        # Check that the row headings are correct:
-        row_names=$("$absolute_file_path" head -n 19 | tail -n 1)
-        echo row_names
-        if [[ $row_names == "Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Description" ]];
-        then
-            echo "Spreadsheet row names are correct"
-        else
-            raise_warning "$file has incorrect row names"
-        fi
-        # Check that sample names are formatted correctly
-
-
-        # Check that indexes have been input correctly
-
     done
