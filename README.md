@@ -25,4 +25,4 @@ bash samplesheet_checker.sh "/home/mokaguys/runfolders/samplesheets"
 
 This script runs as a daemon in the background, monitoring a directory for Illumina SampleSheets.  It parses the file name and contents and uses a regex to compare against expected patterns.  If an error is detected (which will likely cause an error in the pipeline, delaying results) a notification is sent to the monitor using libnotify and a warning is sent to the Syslog, which is setup to fire a warning to the Bioinformatics team via a SLack channel.
 
-Writing to Syslog allows easier troubleshooting of the errors as well as allowing the extent of errors to be monitoered. 
+Writing to Syslog allows easier troubleshooting of the errors as well as allowing the extent of errors to be monitored. 
