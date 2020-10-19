@@ -30,7 +30,7 @@ notify-send -u critical "$warning_message"
 # TODO: Consider placing filter to onl;y run main tests on csv files - should through a limited if non-CSV file detected
 # ()
 
-inotifywait -m "$directory_to_watch" -e create -e moved_to |
+inotifywait -d "$directory_to_watch" -e create -e moved_to |
     while IFS= read -r file; do
         echo "Change detected:" # Useful when debugging to know that script is running
         # Parse filename
