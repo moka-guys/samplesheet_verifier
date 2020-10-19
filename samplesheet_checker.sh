@@ -114,6 +114,11 @@ inotifywait -m "$directory_to_watch" -e create -e moved_to |
                 data_correct=1
                     while IFS= read -r  line; do
                         echo "$line"
+                        if [[ $(tail -n +20 "$absolute_file_path" | cut -d ',' -f1) =~ 0 ]]; then raise_warning "$file_name has errors in data, see log for details"; fi
+                        if [[ $(tail -n +20 "$absolute_file_path" | cut -d ',' -f2) =~ 0 ]]; then raise_warning "$file_name has errors in data, see log for details"; fi
+                        # Check that indexes look like DNA sequences:
+                        if [[ $(tail -n +20 "$absolute_file_path" | cut -d ',' -f6) =~ ^[AGCT]*$ ]]; then raise_warning "$file_name has errors in data, see log for details"; fi
+                        if [[ $(tail -n +20 "$absolute_file_path" | cut -d ',' -f8) =~ ^[AGCT]*$ ]]; then raise_warning "$file_name has errors in data, see log for details"; fi
                     done  < "$absolute_file_path"
                 if [[ "$data_correct" == 0 ]]; then raise_warning "$file_name has errors in data, see log for details"; fi
             fi
