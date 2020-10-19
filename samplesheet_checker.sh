@@ -51,7 +51,7 @@ inotifywait -d "$directory_to_watch" -e create -e moved_to |
         then
             echo "$file_name matches pattern"
         else
-            raise_warning "Sample sheet has been saved to workstation with the file name $file_name, which does not match the expected naming convention"
+            raise_warning "SAMPLESHEET ERROR: Sample sheet has been saved to workstation with the file name $file_name, which does not match the expected naming convention"
         fi
 
         ## Check that the contents of the SampleSheet pass some minimum criteria
@@ -68,7 +68,7 @@ inotifywait -d "$directory_to_watch" -e create -e moved_to |
             lines_detected_in_file=$(wc -l "$absolute_file_path")
             if [[ ! $lines_detected_in_file > $lines_expected_in_file ]];
             then
-                raise_warning "$file_name contains only $lines_detected_in_file lines, but expected at least $lines_expected_in_file for valid file";
+                raise_warning "SAMPLESHEET ERROR: $file_name contains only $lines_detected_in_file lines, but expected at least $lines_expected_in_file for valid file";
 
                 # Check the header headings are correct
                 # Extract first column into array
@@ -92,7 +92,7 @@ inotifywait -d "$directory_to_watch" -e create -e moved_to |
                     then
                         echo "Row names in headers for $file_name are correct"
                     else
-                        raise_warning "$file_name has incorrect heading titles in header"
+                        raise_warning "SAMPLESHEET ERROR: $file_name has incorrect heading titles in header"
                     fi
 
                     # Check read lengths have been entered correctly (length 100-999): TODO Can probably improve this test
@@ -100,7 +100,7 @@ inotifywait -d "$directory_to_watch" -e create -e moved_to |
                     then
                         echo "Read lengths are within expected values"
                     else
-                        raise_warning "$file_name has no, or incorrect, read lengths recorded"
+                        raise_warning "SAMPLESHEET ERROR: $file_name has no, or incorrect, read lengths recorded"
                     fi
 
                     # Check that the row headings are correct:
@@ -110,7 +110,7 @@ inotifywait -d "$directory_to_watch" -e create -e moved_to |
                     then
                         echo "Spreadsheet row names are correct"
                     else
-                        raise_warning "$file_name has incorrect row names"
+                        raise_warning "SAMPLESHEET ERROR: $file_name has incorrect row names"
                     fi;
                 # Check that sample names are formatted correctly (read in lines and compare to regex)
                 data_correct=1 # Set as true - used to raise single warning no matter how many lines in the file fail
@@ -124,7 +124,7 @@ inotifywait -d "$directory_to_watch" -e create -e moved_to |
                         if [[ $(echo "$line" | cut -d ',' -f6) =~ ^[AGCT]*$ ]]; then echo "$line has invalid Index in col 6" && data_correct=0; fi
                         if [[ $(echo "$line" | cut -d ',' -f8) =~ ^[AGCT]*$ ]]; then echo "$line has invalid Index in col 8" && data_correct=0; fi
                     done  < "$absolute_file_path"
-                if [[ "$data_correct" == 0 ]]; then raise_warning "$file_name has errors in data, see log for details"; fi
+                if [[ "$data_correct" == 0 ]]; then raise_warning "SAMPLESHEET ERROR: $file_name has errors in data, see log for details"; fi
             fi
         fi
     done
