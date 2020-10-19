@@ -27,6 +27,8 @@ notify-send -u critical "$warning_message"
 
 ############### Run Program ###############
 
+# TODO: Consider placing filter to onl;y run main tests on csv files - should through a limited if non-CSV file detected
+# ()
 
 inotifywait -m "$directory_to_watch" -e create -e moved_to |
     while IFS= read -r file; do
@@ -69,7 +71,7 @@ inotifywait -m "$directory_to_watch" -e create -e moved_to |
                 raise_warning "$file_name contains only $lines_detected_in_file lines, but expected at least $lines_expected_in_file for valid file";
 
                 # Check the header headings are correct
-                # Extract first column to array
+                # Extract first column into array
                 else
                 mapfile -t first_col_array < <(cut -d ',' -f1 "$absolute_file_path" | head -n 19)
                 # Check headings are correct:
@@ -93,7 +95,7 @@ inotifywait -m "$directory_to_watch" -e create -e moved_to |
                         raise_warning "$file_name has incorrect heading titles in header"
                     fi
 
-                    # Check read lengths have been entered correctly (length 100-999):
+                    # Check read lengths have been entered correctly (length 100-999): TODO Can probably improve this test
                     if [[ ${first_col_array[12]} =~ [0-9]{3}] && ${first_col_array[13]} =~ [0-9]{3}] ]];
                     then
                         echo "Read lengths are within expected values"
@@ -111,14 +113,16 @@ inotifywait -m "$directory_to_watch" -e create -e moved_to |
                         raise_warning "$file_name has incorrect row names"
                     fi;
                 # Check that sample names are formatted correctly (read in lines and compare to regex)
-                data_correct=1
+                data_correct=1 # Set as true - used to raise single warning no matter how many lines in the file fail
+
+                    # TODO Add log file to write this info to so that correcting broken sample sheets is easier
                     while IFS= read -r  line; do
-                        echo "$line"
-                        if [[ $(tail -n +20 "$absolute_file_path" | cut -d ',' -f1) =~ 0 ]]; then raise_warning "$file_name has errors in data, see log for details"; fi
-                        if [[ $(tail -n +20 "$absolute_file_path" | cut -d ',' -f2) =~ 0 ]]; then raise_warning "$file_name has errors in data, see log for details"; fi
+                        sample_name_pattern="^[A-Z, 0-9]*_[0-9]{2}_[0-9]*_[A-Z]{2}_[MFU]_[A-Z,0-9]*_Pan[0-9]*,"
+                        if [[ $(echo "$line" | cut -d ',' -f1) =~ $sample_name_pattern ]]; then echo "$line has incorrect sample name in col 1" && data_correct=0; fi
+                        if [[ $(echo "$line" | cut -d ',' -f2) =~ $sample_name_pattern ]]; then echo "$line has incorrect sample name in col 2" && data_correct=0; fi
                         # Check that indexes look like DNA sequences:
-                        if [[ $(tail -n +20 "$absolute_file_path" | cut -d ',' -f6) =~ ^[AGCT]*$ ]]; then raise_warning "$file_name has errors in data, see log for details"; fi
-                        if [[ $(tail -n +20 "$absolute_file_path" | cut -d ',' -f8) =~ ^[AGCT]*$ ]]; then raise_warning "$file_name has errors in data, see log for details"; fi
+                        if [[ $(echo "$line" | cut -d ',' -f6) =~ ^[AGCT]*$ ]]; then echo "$line has invalid Index in col 6" && data_correct=0; fi
+                        if [[ $(echo "$line" | cut -d ',' -f8) =~ ^[AGCT]*$ ]]; then echo "$line has invalid Index in col 8" && data_correct=0; fi
                     done  < "$absolute_file_path"
                 if [[ "$data_correct" == 0 ]]; then raise_warning "$file_name has errors in data, see log for details"; fi
             fi
