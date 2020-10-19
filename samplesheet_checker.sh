@@ -36,9 +36,10 @@ warning_message_array=${1}
 ############### Run Program ###############
 
 
-inotifywait -m $directory_to_watch -e create -e moved_to |
+inotifywait -m "$directory_to_watch" -e create -e moved_to |
     while IFS= read -r file; do
-        echo "Change detected:" # Useful when debugging to know that script is running correctly
+        echo "Change detected:" # Useful when debugging to know that script is running
+        # Parse filename
         filepath=$(echo "$file" | awk -F " " '{print $1}')
         file_name=$(echo "$file" | awk -F " " '{print $NF}')
         absolute_file_path="$filepath$file_name"
@@ -50,12 +51,13 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
     	IFS='_' read -r -a array <<< "$file_name"
         echo "Hello"
         printf '%s\n' "${array[@]}"
+        printf '%s\n' "${#array[@]}"
         echo "Hello"
     	# We then reiterate over the array checking that each component of the file name matches the expected formatting and that the correct number of fields are present:
         if [[ ${array[0]} =~ [0-9]{6} && \
         	${array[2]} =~ [0-9]{4} && \
-            ${array[4]} =~ "SampleSheet.csv" && \
-            ${#array[@]} == 5 ]]; # Does the file match expected pattern
+            ${array[4]} == "SampleSheet.csv" && \
+            ${#array[@]} == "5" ]]; # Does the file match expected pattern
         then
             echo "$file_name matches pattern"
         else
@@ -66,7 +68,7 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
 
         # Check that the SampleSheet has data in it
         lines_expected_in_file=20 # Header takes up 19 lines
-        lines_detected_in_file=$(wc -l "$file")
+        lines_detected_in_file=$(wc -l "$absolute_file_path")
         if [[ ! $lines_detected_in_file > $lines_expected_in_file ]];
         then
         	raise_warning "$file_name contains only $lines_detected_in_file lines, but expected at least $lines_expected_in_file for valid file"
@@ -74,7 +76,7 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
 
         # Check the header headings are correct
         # Extract first column to array
-        mapfile -t first_col_array < <(cut -d ',' -f1 "$file" | head -n 19)
+        mapfile -t first_col_array < <(cut -d ',' -f1 "$absolute_file_path" | head -n 19)
         # Check headings are correct:
         if [[ ${first_col_array[0]} == "[Header]" && \
         ${first_col_array[1]} == "IEMFileVersion" && \
@@ -105,7 +107,7 @@ inotifywait -m $directory_to_watch -e create -e moved_to |
         fi
 
         # Check that the row headings are correct:
-        row_names=$("$file" head -n 19 | tail -n 1)
+        row_names=$("$absolute_file_path" head -n 19 | tail -n 1)
         echo row_names
         if [[ $row_names == "Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Description" ]];
         then
