@@ -26,13 +26,6 @@ notify-send -u critical "$warning_message"
 # logger -s "$warning_message"
 }
 
-# Send warning messages
-function set_warning_message {
-
-# Usage: raise_warning ${warning_message}
-warning_message_array=${1}
-}
-
 ############### Run Program ###############
 
 
@@ -65,6 +58,15 @@ inotifywait -m "$directory_to_watch" -e create -e moved_to |
         fi
 
         ## Check that the contents of the SampleSheet pass some minimum criteria
+
+        # Check that the file is not empty:
+        if [[ -s $absolute_file_path ]];
+        then
+            raise_warning "$file_name, is an empty file";
+        else
+            echo "$file_name contains data";
+            # Run further checks on the formatting of the data
+        fi
 
         # Check that the SampleSheet has data in it
         lines_expected_in_file=20 # Header takes up 19 lines
