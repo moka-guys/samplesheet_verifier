@@ -9,6 +9,8 @@
 # "/home/graeme/Desktop/Test_name_checker/"
 directory_to_watch=$1
 
+# TODO Add testing flag to allow continuous integration testing
+
 ############### Functions ###############
 
 # Send warning messages
