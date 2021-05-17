@@ -27,3 +27,7 @@ bash samplesheet_checker.sh -r /home/mokaguys/runfolders -s /home/mokaguys/runfo
 This script runs as a daemon in the background, monitoring a directory for Illumina Runfolders.  When a new runfolder is detected it looks in the SampleSheet folder for a matching samplesheet.  It parses the file name and contents and uses a regex to compare against expected patterns.  If an error is detected (which will likely cause an error in the pipeline, delaying results) an optional notification can be sent to the monitor using libnotify and a warning is sent to the Syslog using logger, which is setup to fire a warning to the Bioinformatics team via a Slack channel.
 
 Writing to Syslog allows easier troubleshooting of the errors as well as allowing the extent of errors to be monitored.
+
+###
+
+NOTE: If a badly formatted sampleSheet is not detected by this script please raise an issue in this repo and provide the Bioinformatics team with the incorrectly formatted CSV file so that this script can be improved.
