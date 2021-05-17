@@ -7,7 +7,25 @@
 # Get path from command line
 
 # "/home/graeme/Desktop/Test_name_checker/"
-directory_to_watch=$1
+
+while getopts ":r:s:" opt; do
+    case ${opt} in
+    r ) # process option h
+        runfolder_to_watch=$OPTARG
+        echo $runfolder_to_watch
+      ;;
+    s ) # process option s
+        samplesheet_folder=$OPTARG
+        echo $samplesheet_folder
+      ;;
+    \? ) echo "Usage: samplesheet_checker.sh [-r] [-s] [-l]"
+         echo "-r Folder holding the Runfolder directories"
+         echo "-s Folder holding the SampleSheets for each run"
+         echo "samplesheet_checker.sh -r /home/mokaguys/runfolders -s /home/mokaguys/runfolders/samplesheets"
+      ;;
+  esac
+done
+shift $((OPTIND -1))
 
 # TODO Add testing flag to allow continuous integration testing
 
@@ -29,10 +47,10 @@ notify-send -u critical "$warning_message"
 
 ############### Run Program ###############
 
-# TODO: Consider placing filter to onl;y run main tests on csv files - should through a limited if non-CSV file detected
+# TODO: Consider placing filter to only run main tests on csv files - should through a limited if non-CSV file detected
 # ()
 
-inotifywait -d "$directory_to_watch" -e create -e moved_to |
+inotifywait -d "$runfolder_to_watch" -e create -e moved_to |
     while IFS= read -r file; do
         echo "Change detected:" # Useful when debugging to know that script is running
         # Parse filename
