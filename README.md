@@ -13,16 +13,17 @@ This script should be reviewed and expanded every time their is an issue with a 
 
 ## How does samplesheet_verifier work
 ###  Inputs
+* A directory where Illumina Runfolders are saved
 * A directory where Illumina formatted SampleSheets are saved
 
 ### Usage
 
-bash samplesheet_checker.sh "/home/mokaguys/runfolders/samplesheets"
+bash samplesheet_checker.sh -r /home/mokaguys/runfolders -s /home/mokaguys/runfolders/samplesheets
 
 (This script runs as a daemon in the background and the command would typically be set to run periodically by a chron job.) TODO: Check how to terminate inotify before restarting
 
 ### 
 
-This script runs as a daemon in the background, monitoring a directory for Illumina SampleSheets.  It parses the file name and contents and uses a regex to compare against expected patterns.  If an error is detected (which will likely cause an error in the pipeline, delaying results) a notification is sent to the monitor using libnotify and a warning is sent to the Syslog, which is setup to fire a warning to the Bioinformatics team via a SLack channel.
+This script runs as a daemon in the background, monitoring a directory for Illumina Runfolders.  When a new runfolder is detected it looks in the SampleSheet folder for a matching samplesheet.  It parses the file name and contents and uses a regex to compare against expected patterns.  If an error is detected (which will likely cause an error in the pipeline, delaying results) an optional notification can be sent to the monitor using libnotify and a warning is sent to the Syslog using logger, which is setup to fire a warning to the Bioinformatics team via a Slack channel.
 
-Writing to Syslog allows easier troubleshooting of the errors as well as allowing the extent of errors to be monitored. 
+Writing to Syslog allows easier troubleshooting of the errors as well as allowing the extent of errors to be monitored.

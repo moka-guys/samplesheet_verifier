@@ -21,7 +21,7 @@ while getopts ":r:s:" opt; do
     \? ) echo "Usage: samplesheet_checker.sh [-r] [-s] [-l]"
          echo "-r Folder holding the Runfolder directories"
          echo "-s Folder holding the SampleSheets for each run"
-         echo "samplesheet_checker.sh -r /home/mokaguys/runfolders -s /home/mokaguys/runfolders/samplesheets"
+         echo "bash samplesheet_checker.sh -r /home/mokaguys/runfolders -s /home/mokaguys/runfolders/samplesheets"
       ;;
   esac
 done
