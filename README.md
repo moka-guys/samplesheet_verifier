@@ -1,7 +1,7 @@
 # samplesheet_verifier
 
-This script is designed to run on a linux system and monitors a directory for changes.  If a Illumina SampleSheet CSV file is saved to the directory the script parses the file name and contents - upon finding any issues with the format which will cause problems with our pipeline it:
-* Notifys the local user that there is an issue with the SampleSheet which will delay the run, giving them a chance to rectify the issues.
+This script is designed to run on a linux system and monitors a directory for changes.  If a Illumina Runfolder is saved to the directory the script checkes for a matching Illumina Runsheet parsing the file name and contents - upon finding any issues with the format which will cause problems with our pipeline it:
+* Notifys the local user that there is an issue with the SampleSheet which will delay the run, giving them a chance to rectify the issues (Optional).
 * Gives early warning to the Bioinformatics team via the moka-alerts slack channel.
 * Writes the Error Message to the systemlog so that such errors are tracked, allowing appropriate training to directed to lab staff as needed.
 This script should be reviewed and expanded every time their is an issue with a sample sheet which reachs the pipeline.  By taking a "No broken windows" approach we can use this script as part of a process to help prevent delays due to incorrect samplesheets.
@@ -9,7 +9,7 @@ This script should be reviewed and expanded every time their is an issue with a 
 ## Requirements
 * bash environment
 * inotify-tools
-* libnotify-bin
+* libnotify-bin (Optional)
 
 ## How does samplesheet_verifier work
 ###  Inputs
