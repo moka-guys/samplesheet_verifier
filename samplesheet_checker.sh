@@ -10,6 +10,7 @@
 
 # TODO Make libnotify optional as nobody will be observing the workstation during sequencing run
 
+# Parse commandline arguments
 while getopts ":r:s:" opt; do
     case ${opt} in
     r ) # process option h
@@ -43,8 +44,7 @@ warning_message=${1}
 echo "$warning_message"
 # Raise a local warning notification for the user on the workstation
 notify-send -u critical "$warning_message"
-# Trigger a remote alert in Slack & save warning to local log
-# logger -s "$warning_message"
+# Trigger a remote alert in Slack & save warning to local loglogger -s "$warning_message"
 }
 
 ############### Run Program ###############
