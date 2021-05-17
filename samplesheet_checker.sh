@@ -8,6 +8,8 @@
 
 # "/home/graeme/Desktop/Test_name_checker/"
 
+# TODO Make libnotify optional as nobody will be observing the workstation during sequencing run
+
 while getopts ":r:s:" opt; do
     case ${opt} in
     r ) # process option h
